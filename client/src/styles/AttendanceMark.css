@@ -1,0 +1,241 @@
+.attendance-mark-page {
+    min-height: 100vh;
+    padding: 36px max(24px, calc((100% - 1320px) / 2));
+    background: #f5f7fb;
+    color: #42536b;
+    font-family: Arial, sans-serif;
+    text-align: left;
+}
+
+.attendance-mark-header,
+.attendance-mark-header nav,
+.attendance-mark-toolbar,
+.attendance-date-field span,
+.attendance-mark-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.attendance-mark-header {
+    margin-bottom: 25px;
+}
+
+.attendance-mark-header h1 {
+    margin: 0 0 7px;
+    color: #18365e;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.attendance-mark-header p:not(.attendance-eyebrow) {
+    color: #7a899e;
+    font-size: 14px;
+}
+
+.attendance-eyebrow {
+    margin: 0 0 6px;
+    color: #1765d8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.attendance-mark-header nav {
+    justify-content: flex-end;
+}
+
+.attendance-mark-header nav a {
+    color: #42638d;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.attendance-alert {
+    margin-bottom: 16px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.attendance-alert.error {
+    background: #fff0f0;
+    color: #b42318;
+}
+
+.attendance-alert.success {
+    background: #e3f7ee;
+    color: #13845b;
+}
+
+.attendance-mark-panel {
+    padding: 22px;
+    border: 1px solid #e8edf5;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(35, 60, 90, 0.04);
+}
+
+.attendance-mark-toolbar {
+    align-items: flex-end;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.attendance-date-field,
+.attendance-search-field {
+    display: flex;
+    min-width: 220px;
+    flex-direction: column;
+    gap: 7px;
+    color: #52647c;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.attendance-date-field span {
+    justify-content: flex-start;
+}
+
+.attendance-mark-toolbar input,
+.attendance-mark-table input,
+.attendance-mark-table select {
+    min-height: 38px;
+    padding: 7px 9px;
+    border: 1px solid #dce4ef;
+    border-radius: 7px;
+    background: white;
+    color: #42536b;
+    font: inherit;
+    font-size: 13px;
+}
+
+.attendance-mark-count {
+    margin-left: auto;
+    padding: 9px 12px;
+    border-radius: 20px;
+    background: #e9f2ff;
+    color: #1765d8;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.attendance-mark-table {
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.attendance-mark-table thead th {
+    padding: 13px 10px;
+    border-bottom: 1px solid #e8edf5;
+    background: #f7f9fc;
+    color: #64758b;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.attendance-mark-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #eef1f6;
+    color: #42536b;
+    font-size: 13px;
+}
+
+.attendance-mark-table td input,
+.attendance-mark-table td select {
+    min-width: 115px;
+    width: 100%;
+}
+
+.attendance-mark-table td:nth-child(4) select {
+    min-width: 125px;
+}
+
+.attendance-mark-table td:nth-child(7) input {
+    min-width: 150px;
+}
+
+.attendance-employee-name {
+    min-width: 145px;
+    color: #18365e !important;
+    font-weight: 600;
+}
+
+.attendance-mark-empty {
+    padding: 32px !important;
+    color: #7a899e !important;
+    text-align: center;
+}
+
+.attendance-mark-footer {
+    padding-top: 18px;
+}
+
+.attendance-mark-footer p {
+    color: #7a899e;
+    font-size: 12px;
+}
+
+.attendance-save-button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 9px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #1765d8;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.attendance-save-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+@media (max-width: 700px) {
+    .attendance-mark-page {
+        padding: 22px 14px;
+    }
+
+    .attendance-mark-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .attendance-mark-header nav {
+        justify-content: flex-start;
+    }
+
+    .attendance-mark-panel {
+        padding: 15px;
+    }
+
+    .attendance-mark-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .attendance-date-field,
+    .attendance-search-field {
+        min-width: 0;
+    }
+
+    .attendance-mark-count {
+        align-self: flex-start;
+        margin-left: 0;
+    }
+
+    .attendance-mark-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

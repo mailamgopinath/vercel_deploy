@@ -1,0 +1,37 @@
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #20221e;
+  background: #fbfaf7;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --ink: #20221e;
+  --muted: #70736a;
+  --paper: #fbfaf7;
+  --white: #fff;
+  --line: #e7e6df;
+  --green: #244f3c;
+  --green-dark: #183a2b;
+  --lime: #d4ed75;
+  --orange: #e4754e;
+  --serif: 'DM Serif Display', Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { min-width: 320px; margin: 0; }
+button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { color: inherit; }
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+::selection { color: var(--ink); background: var(--lime); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+#root { width: 100%; max-width: none; min-height: 100svh; margin: 0; display: block; text-align: left; border: 0; }
+h1, h2 { color: var(--ink); font-family: var(--serif); font-weight: 400; letter-spacing: 0; }
+h1 { margin: 0; font-size: inherit; }
+h2 { margin: 0; }
+p { margin: 0; }
+@media (max-width: 600px) { html { scroll-padding-top: 12px; } }
