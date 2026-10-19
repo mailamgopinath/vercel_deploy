@@ -3,7 +3,9 @@
 
 import axios from "axios";
 
-const api = axios.create({ baseURL: "/api" });
+// In production VITE_API_URL is the backend address (e.g. https://xxx.onrender.com).
+// Locally it is empty, so "/api" goes through the Vite proxy to localhost:5000.
+const api = axios.create({ baseURL: `${import.meta.env.VITE_API_URL || ""}/api` });
 
 // Before EVERY request, attach the login token (if the user is logged in).
 // The server reads it to know who is making the request.
