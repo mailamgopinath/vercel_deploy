@@ -54,6 +54,24 @@ async function addColumnIfMissing(connection, table, column, definition) {
   }
 }
 
+// Indexes make the product list queries fast as the table grows: [table, index name, columns].
+const indexes = [
+  ["products", "idx_products_status_category", "status, category"],
+  ["products", "idx_products_created", "created_at"],
+];
+
+async function addIndexIfMissing(connection, table, name, columns) {
+  const [rows] = await connection.query(
+    `SELECT COUNT(*) AS count FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?`,
+    [process.env.DB_NAME, table, name]
+  );
+  if (rows[0].count === 0) {
+    await connection.query(`CREATE INDEX ${name} ON ${table} (${columns})`);
+    console.log(`Added index ${name}`);
+  }
+}
+
 // Older databases required every category name to be unique. Switch them to
 // "unique within the same parent", so "Jeans" can be a sub category of Men AND Women.
 async function upgradeCategoriesTable(connection) {
@@ -130,6 +148,9 @@ async function setup() {
   // 2. Upgrade older tables.
   for (const [table, column, definition] of newColumns) {
     await addColumnIfMissing(connection, table, column, definition);
+  }
+  for (const [table, name, columns] of indexes) {
+    await addIndexIfMissing(connection, table, name, columns);
   }
   // Older orders didn't store a subtotal; the total is the best guess.
   await connection.query("UPDATE orders SET subtotal = total WHERE subtotal = 0");

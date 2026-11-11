@@ -11,6 +11,9 @@ const db = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  connectionLimit: 10, // at most 10 queries at the same time
+  queueLimit: 100,     // more than 100 waiting? fail fast instead of freezing the server
+  connectTimeout: 10000,
   // Aiven requires an encrypted (SSL) connection.
   ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
 });

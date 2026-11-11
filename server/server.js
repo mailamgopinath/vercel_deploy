@@ -4,12 +4,28 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const compression = require("compression");
+const rateLimit = require("express-rate-limit");
+const { cacheGets, clearCacheOnChanges } = require("./utils/cache");
+
 const app = express();
+app.set("trust proxy", 1); // on Render the real visitor address comes from the proxy
 
 // ---- Middleware (runs on every request) ----
 app.use(cors());                      // lets the React app (another port) call this server
+app.use(compression());               // smaller responses = faster pages
 app.use(express.json());              // lets us read JSON sent in req.body
 app.use("/uploads", express.static("uploads")); // serves uploaded product pictures
+
+// Rate limits: one visitor can't flood the server and slow everyone else down.
+const tooMany = { message: "Too many requests, please try again in a moment" };
+app.use("/api", rateLimit({ windowMs: 60 * 1000, limit: 300, message: tooMany }));          // 300 / minute
+app.use("/api/auth", rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, message: tooMany })); // login: 30 / 15 min
+
+// Cache: public pages are saved for a short time; any change by an admin or an order clears them.
+app.use("/api", clearCacheOnChanges);
+app.use("/api/products", cacheGets(30));
+app.use("/api/banners", cacheGets(60));
 
 // ---- Routes: each file handles one part of the store ----
 app.use("/api/auth", require("./routes/auth"));
