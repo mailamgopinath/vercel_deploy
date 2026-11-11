@@ -1,12 +1,13 @@
 // Remembers who is logged in, and shares it with every page.
 // Any component can do:  const { user, login, logout } = useAuth();
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "./api";
 
 const AuthContext = createContext(null);
 
-// When the page reloads, restore the user saved in the browser.
+// The login token itself is an HttpOnly cookie that the browser keeps and JavaScript cannot
+// read. Only the user's name/role (not secret) is saved here, to show the header quickly.
 function readSavedUser() {
   try {
     return JSON.parse(localStorage.getItem("stylehub-user"));
@@ -18,9 +19,24 @@ function readSavedUser() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readSavedUser);
 
-  // Save the token + user after a successful login/register.
+  // On page load, ask the server if the cookie is still valid. If not, log out here too.
+  useEffect(() => {
+    if (!readSavedUser()) return;
+    api.get("/auth/me")
+      .then((response) => {
+        localStorage.setItem("stylehub-user", JSON.stringify(response.data.user));
+        setUser(response.data.user);
+      })
+      .catch((error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem("stylehub-user");
+          setUser(null);
+        }
+      });
+  }, []);
+
+  // Remember the user after a successful login/register (the server set the cookie).
   function saveLogin(data) {
-    localStorage.setItem("stylehub-token", data.token);
     localStorage.setItem("stylehub-user", JSON.stringify(data.user));
     setUser(data.user);
   }
@@ -38,7 +54,7 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
-    localStorage.removeItem("stylehub-token");
+    api.post("/auth/logout").catch(() => {}); // the server deletes the cookie
     localStorage.removeItem("stylehub-user");
     setUser(null);
   }

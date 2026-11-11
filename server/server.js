@@ -4,6 +4,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const { cacheGets, clearCacheOnChanges } = require("./utils/cache");
@@ -12,7 +13,24 @@ const app = express();
 app.set("trust proxy", 1); // on Render the real visitor address comes from the proxy
 
 // ---- Middleware (runs on every request) ----
-app.use(cors());                      // lets the React app (another port) call this server
+// Only these websites may call the API with the login cookie. Add more with CLIENT_URL
+// (comma separated), for example your own domain.
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://vercel-deploy-frontend.onrender.com",
+  ...(process.env.CLIENT_URL || "").split(",").map((url) => url.trim().replace(/\/$/, "")).filter(Boolean),
+];
+app.use(cors({ origin: allowedOrigins, credentials: true })); // credentials: lets the cookie travel
+app.use(cookieParser());              // lets us read the login cookie
+// Protection against CSRF: a change request (POST/PUT/DELETE) from any other website is refused.
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && origin && !allowedOrigins.includes(origin)) {
+    return res.status(403).json({ message: "Request not allowed from this website" });
+  }
+  next();
+});
 app.use(compression());               // smaller responses = faster pages
 app.use(express.json());              // lets us read JSON sent in req.body
 app.use("/uploads", express.static("uploads")); // serves uploaded product pictures

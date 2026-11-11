@@ -6,7 +6,8 @@ import axios from "axios";
 // In production VITE_API_URL is the backend address (e.g. https://xxx.onrender.com).
 // Locally it is empty, so "/api" goes through the Vite proxy to localhost:5000.
 const API_URL = import.meta.env.VITE_API_URL || "";
-const api = axios.create({ baseURL: `${API_URL}/api` });
+// withCredentials: the browser sends the HttpOnly login cookie with every request.
+const api = axios.create({ baseURL: `${API_URL}/api`, withCredentials: true });
 
 // Uploaded pictures live on the backend ("/uploads/..."). When the frontend is on a
 // different address, point those paths at the backend so the images load.
@@ -17,16 +18,6 @@ api.interceptors.response.use((response) => {
     );
   }
   return response;
-});
-
-// Before EVERY request, attach the login token (if the user is logged in).
-// The server reads it to know who is making the request.
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("stylehub-token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
 });
 
 // The database uses names like "old_price". Our React pages expect "oldPrice",

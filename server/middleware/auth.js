@@ -3,11 +3,14 @@
 
 const jwt = require("jsonwebtoken");
 
+const COOKIE_NAME = "stylehub-token";
+
 // 1. loginRequired: the visitor must send a valid login token.
-//    The frontend sends it in a header:  Authorization: Bearer <token>
+//    It comes in an HttpOnly cookie (set at login). A header "Authorization: Bearer <token>"
+//    is still accepted for tools like Postman.
 function loginRequired(req, res, next) {
   const header = req.headers.authorization || "";
-  const token = header.replace("Bearer ", "");
+  const token = req.cookies?.[COOKIE_NAME] || header.replace("Bearer ", "");
 
   if (!token) {
     return res.status(401).json({ message: "Please log in first" });
@@ -31,4 +34,4 @@ function adminOnly(req, res, next) {
   next();
 }
 
-module.exports = { loginRequired, adminOnly };
+module.exports = { loginRequired, adminOnly, COOKIE_NAME };

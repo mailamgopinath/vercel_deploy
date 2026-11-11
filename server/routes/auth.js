@@ -1,14 +1,33 @@
 // Sign up and log in.
 //   POST /api/auth/register   { name, email, password }
 //   POST /api/auth/login      { email, password }
-// Both reply with a token. The frontend saves it and sends it with later requests.
+//   POST /api/auth/logout
+//   GET  /api/auth/me         who is logged in right now
+// The login token is sent as an HttpOnly cookie, so JavaScript on the page can never read it.
+// The browser attaches the cookie to every request by itself.
 
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../db");
+const { loginRequired, COOKIE_NAME } = require("../middleware/auth");
 
 const router = express.Router();
+
+// On https (Render) the frontend and backend are on different sites, so the cookie needs
+// SameSite=None + Secure. On http://localhost a plain Lax cookie works.
+function cookieOptions(req) {
+  return {
+    httpOnly: true,
+    secure: req.secure,
+    sameSite: req.secure ? "none" : "lax",
+    path: "/",
+  };
+}
+
+function setLoginCookie(req, res, user) {
+  res.cookie(COOKIE_NAME, makeToken(user), { ...cookieOptions(req), maxAge: 7 * 24 * 60 * 60 * 1000 });
+}
 
 // Make a login token that lasts 7 days.
 function makeToken(user) {
@@ -44,7 +63,8 @@ router.post("/register", async (req, res) => {
   );
 
   const user = { id: result.insertId, name, email, role: "customer" };
-  res.status(201).json({ token: makeToken(user), user });
+  setLoginCookie(req, res, user);
+  res.status(201).json({ user });
 });
 
 router.post("/login", async (req, res) => {
@@ -58,10 +78,22 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({ message: "Wrong email or password" });
   }
 
+  setLoginCookie(req, res, user);
   res.json({
-    token: makeToken(user),
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   });
+});
+
+router.post("/logout", (req, res) => {
+  res.clearCookie(COOKIE_NAME, cookieOptions(req));
+  res.json({ message: "Logged out" });
+});
+
+// The page asks this on load to check the cookie is still valid.
+router.get("/me", loginRequired, async (req, res) => {
+  const [rows] = await db.query("SELECT id, name, email, role FROM users WHERE id = ?", [req.user.id]);
+  if (rows.length === 0) return res.status(401).json({ message: "Please log in first" });
+  res.json({ user: rows[0] });
 });
 
 module.exports = router;
