@@ -5,7 +5,19 @@ import axios from "axios";
 
 // In production VITE_API_URL is the backend address (e.g. https://xxx.onrender.com).
 // Locally it is empty, so "/api" goes through the Vite proxy to localhost:5000.
-const api = axios.create({ baseURL: `${import.meta.env.VITE_API_URL || ""}/api` });
+const API_URL = import.meta.env.VITE_API_URL || "";
+const api = axios.create({ baseURL: `${API_URL}/api` });
+
+// Uploaded pictures live on the backend ("/uploads/..."). When the frontend is on a
+// different address, point those paths at the backend so the images load.
+api.interceptors.response.use((response) => {
+  if (API_URL && response.data && typeof response.data === "object") {
+    response.data = JSON.parse(
+      JSON.stringify(response.data).replace(/"\/uploads\//g, `"${API_URL}/uploads/`)
+    );
+  }
+  return response;
+});
 
 // Before EVERY request, attach the login token (if the user is logged in).
 // The server reads it to know who is making the request.
