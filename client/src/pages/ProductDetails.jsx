@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 import { useCart } from "../CartContext";
 import api, { errorMessage, fetchProducts, normalizeProduct } from "../api";
 import ProductReviews from "../components/ProductReviews";
+import { AnimatePresence, AnimatedNumber, Notice, Reveal, motion, EASE, stagger } from "../motion";
+import { ProductDetailsSkeleton } from "../components/Skeletons";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -90,7 +92,7 @@ function ProductDetailsView({ id }) {
     return (
       <div className="product-details-page">
         <Header />
-        <div className="product-not-found" role="status">Loading product...</div>
+        <ProductDetailsSkeleton />
         <Footer />
       </div>
     );
@@ -200,7 +202,7 @@ function ProductDetailsView({ id }) {
             IMAGE / GALLERY
         ========================= */}
 
-        <div className="product-gallery">
+        <Reveal className="product-gallery" x={-24} y={0}>
 
           {/* THUMBNAILS */}
 
@@ -208,9 +210,12 @@ function ProductDetailsView({ id }) {
 
             {product.images.map(
               (image, index) => (
-                <button
+                <motion.button
                   type="button"
                   key={index}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, ease: EASE, delay: 0.15 + stagger(index, 0.06) }}
                   className={
                     selectedImage === image
                       ? "thumbnail active"
@@ -224,20 +229,27 @@ function ProductDetailsView({ id }) {
                     src={image}
                     alt={`${product.name} ${index + 1}`}
                   />
-                </button>
+                </motion.button>
               )
             )}
 
           </div>
 
-          {/* MAIN IMAGE */}
+          {/* MAIN IMAGE: the old picture fades out and the new one fades in */}
 
           <div className="product-main-image">
 
-            <img
-              src={selectedImage}
-              alt={product.name}
-            />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.img
+                key={selectedImage}
+                src={selectedImage}
+                alt={product.name}
+                initial={{ opacity: 0, scale: 1.03 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.28, ease: EASE }}
+              />
+            </AnimatePresence>
 
             <span className="product-detail-discount">
               {product.discount}% OFF
@@ -245,13 +257,13 @@ function ProductDetailsView({ id }) {
 
           </div>
 
-        </div>
+        </Reveal>
 
         {/* =========================
             PRODUCT INFORMATION
         ========================= */}
 
-        <div className="product-information">
+        <Reveal className="product-information" x={24} y={0} delay={0.1}>
 
           {/* CATEGORY */}
 
@@ -422,9 +434,7 @@ function ProductDetailsView({ id }) {
                 −
               </button>
 
-              <span>
-                {quantity}
-              </span>
+              <AnimatedNumber value={quantity} />
 
               <button
                 type="button"
@@ -458,7 +468,7 @@ function ProductDetailsView({ id }) {
               Buy Now
             </button>
           </div>
-          <p className="purchase-feedback" role="status">{feedback}</p>
+          <Notice show={Boolean(feedback)} className="purchase-feedback" role="status">{feedback}</Notice>
 
           {/* =========================
               WISHLIST
@@ -504,7 +514,7 @@ function ProductDetailsView({ id }) {
             <p>{product.delivery}</p>
           </div>
 
-        </div>
+        </Reveal>
       </section>
 
       {/* =========================

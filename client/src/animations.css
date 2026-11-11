@@ -1,0 +1,174 @@
+﻿/* =====================================================================
+   StyleHub animations (CSS part). Loaded LAST in App.jsx so it adds to the
+   existing styles. Scroll/entrance animations live in motion.jsx (Framer Motion).
+   Rules of thumb: only transform/opacity/shadow change, 200-600ms, gentle easing.
+   We use the separate `translate` / `scale` properties so hover effects never
+   fight with the inline transforms that Framer Motion sets.
+   ===================================================================== */
+
+:root {
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 200ms;
+  --t-base: 320ms;
+  --t-slow: 500ms;
+}
+
+/* ---------- Navbar ---------- */
+.site-header { transition: box-shadow var(--t-base) var(--ease), background-color var(--t-base) var(--ease); }
+.site-header.is-scrolled { background: rgba(248, 247, 241, .98); box-shadow: 0 1px 0 var(--line), 0 10px 28px -14px rgba(32, 58, 46, .28); }
+
+/* underline that grows from the left on hover */
+.main-nav a::after {
+  position: absolute; left: 16px; right: 16px; bottom: 5px; height: 2px; content: '';
+  background: var(--green); border-radius: 2px;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform var(--t-base) var(--ease);
+}
+.main-nav a:hover::after, .main-nav a:focus-visible::after { transform: scaleX(1); }
+
+.icon-link, .search-form button, .auth-link, .header-text-link { transition: background-color var(--t-fast) ease, transform var(--t-fast) var(--ease), color var(--t-fast) ease; }
+.icon-link:active, .search-form button:active { scale: .92; }
+
+/* hamburger button (only shown on phones) */
+.menu-toggle { display: none; width: 44px; height: 44px; padding: 0; place-items: center; color: var(--green); background: transparent; border: 0; border-radius: 50%; cursor: pointer; transition: background-color var(--t-fast) ease; }
+.menu-toggle:hover { background: var(--sage-tint); }
+.menu-toggle span, .menu-toggle::before, .menu-toggle::after { content: ''; display: block; grid-area: 1 / 1; width: 22px; height: 2px; background: currentColor; border-radius: 2px; transition: transform var(--t-base) var(--ease), opacity var(--t-fast) ease; }
+.menu-toggle::before { transform: translateY(-7px); }
+.menu-toggle::after { transform: translateY(7px); }
+.menu-toggle[aria-expanded="true"] span { opacity: 0; transform: scaleX(.2); }
+.menu-toggle[aria-expanded="true"]::before { transform: rotate(45deg); }
+.menu-toggle[aria-expanded="true"]::after { transform: rotate(-45deg); }
+
+/* slide-down mobile menu */
+.mobile-menu { overflow: hidden; border-top: 1px solid var(--line); background: var(--paper); }
+.mobile-menu nav { display: grid; padding: 8px 5% 16px; }
+.mobile-menu a { padding: 14px 4px; color: var(--ink); border-bottom: 1px solid var(--line); font-size: 18px; text-decoration: none; transition: color var(--t-fast) ease, padding-left var(--t-base) var(--ease); }
+.mobile-menu a:hover, .mobile-menu a:focus-visible { color: var(--green); padding-left: 12px; }
+@media (max-width: 600px) {
+  .menu-toggle { display: grid; }
+  .main-nav { display: none; }                 /* replaced by the hamburger menu */
+  .header-main { grid-template-columns: auto 1fr; }
+  .header-actions { grid-column: 2; }
+}
+
+/* cart bag number pops when it changes (see Header.jsx) */
+.bag-count { transform-origin: center; }
+
+/* ---------- Hero ---------- */
+.hero-content { animation: none; }               /* Framer Motion animates it instead */
+.button-primary { transition: background-color var(--t-fast) ease, color var(--t-fast) ease, translate var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease); }
+.button-primary:hover { transform: none; translate: 0 -2px; box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .45); }
+.button-primary:active { translate: 0 0; scale: .98; }
+.button-arrow { display: inline-block; transition: translate var(--t-base) var(--ease); }
+.button-primary:hover .button-arrow { translate: 5px 0; }
+
+/* ---------- Promotional banners: soft lift and a slow picture zoom on hover ---------- */
+.home-banner { transition: translate var(--t-slow) var(--ease), box-shadow var(--t-slow) var(--ease); }
+.home-banner:hover, .home-banner:focus-visible { translate: 0 -4px; box-shadow: 0 20px 36px -20px rgba(22, 42, 33, .6); }
+.home-banner:hover img, .home-banner:focus-visible img { transform: scale(1.05); }
+
+/* ---------- Category tiles ---------- */
+.category-card { transition: box-shadow var(--t-slow) var(--ease), translate var(--t-slow) var(--ease); }
+.category-card:hover { translate: 0 -5px; box-shadow: 0 22px 40px -22px rgba(32, 58, 46, .55); }
+.category-overlay span { display: inline-block; transition: translate var(--t-base) var(--ease); }
+.category-card:hover .category-overlay span { translate: 6px 0; }
+
+/* ---------- Product cards (home, shop, category, wishlist) ---------- */
+.product-card, .shop-product-card, .category-product-card, .wishlist-card { transition: translate var(--t-base) var(--ease); will-change: translate; }
+.product-card:hover, .shop-product-card:hover, .category-product-card:hover, .wishlist-card:hover { translate: 0 -6px; }
+.product-image, .shop-product-image, .category-product-image, .wishlist-image { transition: box-shadow var(--t-base) var(--ease); }
+.product-card:hover .product-image, .shop-product-card:hover .shop-product-image,
+.category-product-card:hover .category-product-image, .wishlist-card:hover .wishlist-image { box-shadow: 0 18px 32px -18px rgba(32, 58, 46, .5); }
+.product-image img, .shop-product-image img, .category-product-image img, .wishlist-image img { transition: transform var(--t-slow) var(--ease); }
+.product-card:hover .product-image img, .shop-product-card:hover .shop-product-image img,
+.category-product-card:hover .category-product-image img, .wishlist-card:hover .wishlist-image img { transform: scale(1.06); }
+
+/* wishlist hearts */
+.wishlist, .wishlist-btn, .wishlist-remove { transition: transform var(--t-fast) var(--ease), background-color var(--t-fast) ease, color var(--t-fast) ease, box-shadow var(--t-fast) ease; }
+.wishlist:hover, .wishlist-btn:hover { scale: 1.1; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); }
+.wishlist:active, .wishlist-btn:active { scale: .9; }
+.wishlist[aria-pressed="true"], .wishlist-btn.wishlist-active, .detail-wishlist.active { animation: heart-pop 420ms var(--ease); }
+@keyframes heart-pop { 0% { scale: .7; } 55% { scale: 1.25; } 100% { scale: 1; } }
+
+/* add-to-bag buttons: press feedback + a soft pulse when the item gets added */
+.add-cart, .shop-add-cart, .category-cart, .wishlist-cart-btn, .add-cart-btn, .buy-now-btn, .checkout-btn, .coupon-input button {
+  transition: color var(--t-fast) ease, background-color var(--t-fast) ease, border-color var(--t-fast) ease, box-shadow var(--t-base) var(--ease), translate var(--t-base) var(--ease), scale var(--t-fast) var(--ease);
+}
+.add-cart:hover, .shop-add-cart:hover, .category-cart:hover, .wishlist-cart-btn:hover, .add-cart-btn:hover, .buy-now-btn:hover, .checkout-btn:hover:not(:disabled) { translate: 0 -2px; box-shadow: 0 10px 20px -12px rgba(32, 58, 46, .6); }
+.add-cart:active, .shop-add-cart:active, .category-cart:active, .wishlist-cart-btn:active, .add-cart-btn:active, .buy-now-btn:active, .checkout-btn:active:not(:disabled) { translate: 0 0; scale: .97; }
+.add-cart.is-added, .shop-add-cart.is-added, .category-cart.is-added, .wishlist-cart-btn.is-added { animation: added-pulse 560ms var(--ease); }
+@keyframes added-pulse { 0% { box-shadow: 0 0 0 0 rgba(32, 58, 46, .45); } 100% { box-shadow: 0 0 0 14px rgba(32, 58, 46, 0); } }
+
+/* ---------- Product details ---------- */
+.thumbnail, .product-size, .color-btn, .detail-wishlist, .size-chart-btn { transition: border-color var(--t-fast) ease, background-color var(--t-fast) ease, color var(--t-fast) ease, translate var(--t-fast) var(--ease), scale var(--t-fast) var(--ease), box-shadow var(--t-fast) ease; }
+.thumbnail:hover, .product-size:hover, .color-btn:hover { translate: 0 -2px; }
+.thumbnail:active, .product-size:active, .color-btn:active { scale: .94; }
+.thumbnail.active, .product-size.active, .color-btn.active { animation: select-pop 300ms var(--ease); }
+.thumbnail img { transition: transform var(--t-base) var(--ease); }
+.thumbnail:hover img { transform: scale(1.08); }
+@keyframes select-pop { 0% { scale: .92; } 60% { scale: 1.05; } 100% { scale: 1; } }
+.quantity-control button, .cart-quantity button { transition: background-color var(--t-fast) ease, scale var(--t-fast) var(--ease); }
+.quantity-control button:hover:not(:disabled), .cart-quantity button:hover:not(:disabled) { background: var(--sage-tint); }
+.quantity-control button:active:not(:disabled), .cart-quantity button:active:not(:disabled) { scale: .85; }
+.quantity-control span { display: inline-block; min-width: 24px; text-align: center; }
+.purchase-feedback:not(:empty) { animation: notice-in var(--t-base) var(--ease); }
+
+/* ---------- Cart & checkout ---------- */
+.cart-item { transition: background-color var(--t-base) ease; }
+.cart-remove { transition: color var(--t-fast) ease, border-color var(--t-fast) ease; }
+.coupon-message, .checkout-message { transition: color var(--t-base) ease; }
+.coupon-message.is-success { animation: notice-in var(--t-base) var(--ease); }
+.checkout-message:not(:empty) { animation: notice-in var(--t-base) var(--ease); }
+.payment-options label { transition: border-color var(--t-fast) ease, background-color var(--t-fast) ease, box-shadow var(--t-base) var(--ease); }
+.payment-options label.is-selected { box-shadow: 0 6px 16px -10px rgba(32, 58, 46, .55); }
+.cart-delivery-note { transition: background-color var(--t-slow) ease, color var(--t-slow) ease; }
+.cart-delivery-note.is-unlocked .delivery-note-icon { animation: select-pop 420ms var(--ease); }
+@keyframes notice-in { from { opacity: 0; translate: 0 -6px; } to { opacity: 1; translate: 0 0; } }
+
+/* spinner shown inside buttons while the server is working */
+.btn-spinner { width: 16px; height: 16px; display: inline-block; vertical-align: -3px; margin-right: 8px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: currentColor; border-radius: 50%; animation: spin 700ms linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+
+/* grey placeholder cards while products load */
+.skeleton { position: relative; overflow: hidden; background: #ebeae2; }
+.skeleton::after { position: absolute; inset: 0; content: ''; background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .6) 50%, transparent 80%); translate: -100% 0; animation: shimmer 1.3s infinite; }
+@keyframes shimmer { to { translate: 100% 0; } }
+.skeleton-card .skeleton-image { aspect-ratio: 3 / 3.8; }
+.skeleton-card [class$="-image"] { position: relative; }
+.skeleton-fill { position: absolute; inset: 0; }
+.skeleton-card { pointer-events: none; }                       /* no hover lift on placeholders */
+.skeleton-line { height: 14px; margin-top: 12px; border-radius: 4px; }
+.skeleton-line.short { width: 55%; }
+.skeleton-line.tall { height: 38px; margin-top: 14px; border-radius: 6px; }
+.skeleton-line.big { height: 38px; width: 80%; margin-top: 14px; }
+.skeleton-row { display: flex; gap: 10px; margin-top: 16px; }
+.skeleton-chip { width: 52px; height: 40px; border-radius: 6px; }
+.thumbnail.skeleton { border: 0; cursor: default; }
+.product-main-image.skeleton { aspect-ratio: 4 / 5; }
+.my-order .skeleton-line:first-child { margin-top: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
+
+/* ---------- Login / register ---------- */
+.auth-card { transition: box-shadow var(--t-slow) var(--ease); }
+.auth-card input { transition: border-color var(--t-fast) ease, box-shadow var(--t-base) var(--ease), translate var(--t-base) var(--ease), background-color var(--t-fast) ease; }
+.auth-card input:focus { translate: 0 -2px; }
+.auth-card button[type="submit"] { transition: background-color var(--t-fast) ease, translate var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease), scale var(--t-fast) var(--ease); }
+.auth-card button[type="submit"]:hover:not(:disabled) { translate: 0 -2px; box-shadow: 0 12px 22px -12px rgba(32, 58, 46, .7); }
+.auth-card button[type="submit"]:active:not(:disabled) { translate: 0 0; scale: .98; }
+.auth-card button[type="submit"]:disabled { opacity: .75; cursor: progress; }
+.auth-error { animation: shake 420ms var(--ease); }
+@keyframes shake { 0%, 100% { translate: 0 0; } 20% { translate: -6px 0; } 40% { translate: 5px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }
+.auth-switch button { transition: color var(--t-fast) ease; }
+
+/* ---------- General links in the footer etc. ---------- */
+.footer-links a { transition: color var(--t-fast) ease, padding-left var(--t-base) var(--ease); }
+
+/* ---------- Respect "reduce motion" ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .product-card:hover, .shop-product-card:hover, .category-product-card:hover, .wishlist-card:hover, .category-card:hover, .home-banner:hover { translate: none; }
+  .home-banner:hover img { transform: none; }
+  .product-card:hover .product-image img, .shop-product-card:hover .shop-product-image img,
+  .category-product-card:hover .category-product-image img, .wishlist-card:hover .wishlist-image img { transform: none; }
+}

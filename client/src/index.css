@@ -1,21 +1,27 @@
 :root {
   font-family: 'DM Sans', sans-serif;
-  color: #20221e;
-  background: #fbfaf7;
+  color: #24231f;
+  background: #f7f4ee;
   color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --ink: #20221e;
+  /* StyleHub palette: ivory, forest, charcoal, sage and a touch of champagne */
+  --ink: #24231f;          /* charcoal text */
   --muted: #70736a;
-  --paper: #fbfaf7;
+  --paper: #f7f4ee;        /* ivory page background */
   --white: #fff;
-  --line: #e7e6df;
-  --green: #244f3c;
-  --green-dark: #183a2b;
-  --lime: #d4ed75;
-  --orange: #e4754e;
+  --line: #e3ded2;
+  --green: #203a2e;        /* forest */
+  --green-dark: #162a21;   /* deeper forest */
+  --lime: #b99a65;         /* champagne accent (badges, eyebrows, hero button) */
+  --orange: #b99a65;       /* champagne again: hover colour on dark backgrounds */
+  --sage: #87917d;
+  --sage-tint: #e8ebe1;    /* soft hover/background tint */
+  --sage-line: #cdd2c6;    /* input and outline borders */
+  --ivory-deep: #efebe1;   /* alternating section background */
+  --focus: #8a6d3b;        /* keyboard focus ring (dark enough to see on ivory) */
   --serif: 'DM Serif Display', Georgia, serif;
 }
 

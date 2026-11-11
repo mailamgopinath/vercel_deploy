@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
 import { fetchProducts } from "../api";
+import { Reveal, stagger } from "../motion";
+import { ProductCardsSkeleton } from "../components/Skeletons";
 
 function Category({ category: categoryProp }) {
   // =========================
@@ -68,11 +70,16 @@ function Category({ category: categoryProp }) {
   // Inactive is hidden here automatically.
 
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true); // true while the products are on their way
 
   useEffect(() => {
     // The URL says "men"; the database says "Men".
     const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
-    fetchProducts({ category: categoryName }).then(setProducts).catch(() => setProducts([]));
+    setLoading(true);
+    fetchProducts({ category: categoryName })
+      .then(setProducts)
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
   }, [category]);
 
   // =========================
@@ -327,12 +334,16 @@ function Category({ category: categoryProp }) {
 
         <div className="category-product-grid">
 
-          {categoryProducts.map(
-            (product) => (
+          {loading && <ProductCardsSkeleton variant="category" count={8} />}
 
-              <article
+          {(loading ? [] : categoryProducts).map(
+            (product, index) => (
+
+              <Reveal
+                as="article"
                 className="category-product-card"
                 key={product.id}
+                delay={stagger(index)}
               >
 
                 {/* PRODUCT IMAGE */}
@@ -408,7 +419,7 @@ function Category({ category: categoryProp }) {
 
                 </div>
 
-              </article>
+              </Reveal>
             )
           )}
 
@@ -418,7 +429,7 @@ function Category({ category: categoryProp }) {
             EMPTY STATE
         ========================= */}
 
-        {categoryProducts.length === 0 && (
+        {!loading && categoryProducts.length === 0 && (
           <div className="category-empty">
 
             <h2>

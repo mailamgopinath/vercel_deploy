@@ -6,18 +6,26 @@ import { useCart } from "../CartContext";
 import { useAuth } from "../AuthContext";
 import { useWishlist } from "../WishlistContext";
 import api, { normalizeProduct } from "../api";
+import { AnimatePresence, motion, Notice, EASE, stagger } from "../motion";
+import { ProductCardsSkeleton } from "../components/Skeletons";
 
 function Wishlist() {
   const { user } = useAuth();
   const { toggleWishlist } = useWishlist();
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [loading, setLoading] = useState(true); // true while the saved list is loading
 
   // Load the logged-in user's saved products from the backend.
   useEffect(() => {
-    if (!user) return;
-    api.get("/wishlist").then((response) => {
-      setWishlistItems(response.data.map(normalizeProduct));
-    });
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    api.get("/wishlist")
+      .then((response) => setWishlistItems(response.data.map(normalizeProduct)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [user]);
 
   const { cartItems, addToCart: addProductToCart } = useCart();
@@ -51,6 +59,10 @@ function Wishlist() {
             <h2>Log in to see your saved items</h2>
             <Link to="/login" className="shopping-primary-link">Log in</Link>
           </section>
+        ) : loading ? (
+          <div className="wishlist-grid" aria-busy="true">
+            <ProductCardsSkeleton variant="wishlist" count={4} />
+          </div>
         ) : wishlistItems.length === 0 ? (
           <section className="shopping-empty">
             <span className="shopping-empty-mark wishlist-empty-mark" aria-hidden="true">♡</span>
@@ -65,8 +77,17 @@ function Wishlist() {
               <p>Prices shown in Indian rupees</p>
             </div>
             <div className="wishlist-grid">
-              {wishlistItems.map((product) => (
-                <article className="wishlist-card" key={product.id}>
+              {/* cards fade in one after another, and shrink away when removed */}
+              <AnimatePresence mode="popLayout" initial>
+              {wishlistItems.map((product, index) => (
+                <motion.article
+                  className="wishlist-card"
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE, delay: stagger(index) } }}
+                  exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.25 } }}
+                >
                   <div className="wishlist-image">
                     <Link to={`/product/${product.id}`} aria-label={`View ${product.name}`}>
                       <img src={product.image} alt={product.name} />
@@ -88,10 +109,11 @@ function Wishlist() {
                       {cartItems.some((item) => item.name === product.name) ? "Added to bag ✓" : "Add to bag"}
                     </button>
                   </div>
-                </article>
+                </motion.article>
               ))}
+              </AnimatePresence>
             </div>
-            <p className="wishlist-feedback" role="status" aria-live="polite">{feedback}</p>
+            <Notice show={Boolean(feedback)} className="wishlist-feedback" role="status" aria-live="polite">{feedback}</Notice>
           </>
         )}
       </main>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import api, { errorMessage, fetchProducts } from "../api";
+import { ReviewsSkeleton } from "./Skeletons";
 
 function ProductReviews({ productId: productIdProp, productName }) {
   const { user } = useAuth();
@@ -13,9 +14,13 @@ function ProductReviews({ productId: productIdProp, productName }) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [message, setMessage] = useState("");
+  const [loaded, setLoaded] = useState(false); // false until the reviews have arrived
 
   function loadReviews(id) {
-    api.get("/reviews", { params: { productId: id } }).then((response) => setReviews(response.data));
+    api.get("/reviews", { params: { productId: id } })
+      .then((response) => setReviews(response.data))
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }
 
   useEffect(() => {
@@ -54,7 +59,8 @@ function ProductReviews({ productId: productIdProp, productName }) {
     <section className="product-reviews">
       <h2>Customer reviews</h2>
 
-      {reviews.length === 0 && <p>No reviews yet. Be the first!</p>}
+      {!loaded && <ReviewsSkeleton />}
+      {loaded && reviews.length === 0 && <p>No reviews yet. Be the first!</p>}
       {reviews.map((review) => (
         <div className="product-review" key={review.id}>
           <strong>{review.user_name}</strong>

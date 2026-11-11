@@ -2,6 +2,8 @@ import React from "react";
 import "./index.css";
 import "./App.css";
 import "./theme.css";
+import "./animations.css";
+import { MotionProvider } from "./motion";
 import {BrowserRouter as Router,Routes,Route,Navigate} from "react-router-dom";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -29,6 +31,7 @@ import { AuthProvider } from "./AuthContext";
 import { WishlistProvider } from "./WishlistContext";
 function App() {
     return (
+        <MotionProvider>
         <AuthProvider>
         <CartProvider>
             <Router>
@@ -70,6 +73,7 @@ function App() {
             </Router>
         </CartProvider>
         </AuthProvider>
+        </MotionProvider>
     );
 }
 export default App;

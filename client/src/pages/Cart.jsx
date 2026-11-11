@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -6,6 +6,7 @@ import { useCart } from "../CartContext";
 import { useAuth } from "../AuthContext";
 import api, { errorMessage, fetchProducts } from "../api";
 import { loadRazorpay } from "../razorpay";
+import { AnimatePresence, AnimatedNumber, Notice, Reveal, motion, EASE } from "../motion";
 
 function Cart() {
   const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -89,7 +90,7 @@ function Cart() {
         name: "StyleHub",
         description: `Order #${order.orderId}`,
         prefill: { name: user.name, email: user.email },
-        theme: { color: "#244f3c" },
+        theme: { color: "#203a2e" },
 
         // The customer paid.
         handler: async (response) => {
@@ -205,8 +206,19 @@ function Cart() {
                   <span>{cartItems.length} {cartItems.length === 1 ? "product" : "products"}</span>
                 </div>
                 <div className="cart-item-list">
+                  {/* items slide in when added and fold away when removed; the rest glide up to fill the gap */}
+                  <AnimatePresence initial={false}>
                   {cartItems.map((item) => (
-                    <article className="cart-item" key={item.lineId}>
+                    <motion.article
+                      className="cart-item"
+                      key={item.lineId}
+                      layout
+                      initial={{ opacity: 0, x: -24 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 40, transition: { duration: 0.25 } }}
+                      transition={{ duration: 0.4, ease: EASE }}
+                      style={{ overflow: "hidden" }}
+                    >
                       <Link to={`/product/${item.id}`} className="cart-product-image">
                         <img src={item.image} alt={item.name} />
                       </Link>
@@ -217,20 +229,21 @@ function Cart() {
                         <div className="cart-item-controls">
                           <div className="cart-quantity" aria-label={`Quantity for ${item.name}`}>
                             <button type="button" aria-label={`Decrease ${item.name} quantity`} disabled={item.quantity === 1} onClick={() => updateQuantity(item.lineId, -1)}>−</button>
-                            <span aria-live="polite">{item.quantity}</span>
+                            <AnimatedNumber value={item.quantity} />
                             <button type="button" aria-label={`Increase ${item.name} quantity`} onClick={() => updateQuantity(item.lineId, 1)}>+</button>
                           </div>
                           <button type="button" className="cart-remove" onClick={() => removeFromCart(item.lineId)}>Remove</button>
                         </div>
                       </div>
-                      <strong className="cart-line-price">₹{(item.price * item.quantity).toLocaleString("en-IN")}</strong>
-                    </article>
+                      <strong className="cart-line-price">₹<AnimatedNumber value={(item.price * item.quantity).toLocaleString("en-IN")} /></strong>
+                    </motion.article>
                   ))}
+                  </AnimatePresence>
                 </div>
                 <Link to="/shop" className="cart-continue-link"><span aria-hidden="true">←</span> Keep browsing</Link>
               </section>
 
-              <aside className="cart-summary" aria-labelledby="cart-summary-title">
+              <Reveal as="aside" className="cart-summary" aria-labelledby="cart-summary-title" x={24} y={0} delay={0.1}>
                 <h2 id="cart-summary-title">Order summary</h2>
                 <form className="coupon-section" onSubmit={applyCoupon}>
                   <label htmlFor="coupon-code">Have a promo code?</label>
@@ -238,14 +251,37 @@ function Cart() {
                     <input id="coupon-code" type="text" value={coupon} onChange={(event) => { setCoupon(event.target.value); setCouponMessage(""); }} placeholder="Enter code" />
                     <button type="submit">Apply</button>
                   </div>
-                  <p className={`coupon-message${couponApplied ? " is-success" : ""}`} aria-live="polite">{couponMessage || "Have a promo code? Enter it above."}</p>
+                  <motion.p
+                    key={couponMessage}
+                    className={`coupon-message${couponApplied ? " is-success" : ""}`}
+                    aria-live="polite"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: EASE }}
+                  >
+                    {couponMessage || "Have a promo code? Enter it above."}
+                  </motion.p>
                 </form>
                 <div className="summary-details">
-                  <div className="summary-row"><span>Subtotal</span><strong>₹{subtotal.toLocaleString("en-IN")}</strong></div>
-                  {couponApplied && <div className="summary-row discount-row"><span>Promo savings</span><strong>−₹{couponDiscount.toLocaleString("en-IN")}</strong></div>}
+                  <div className="summary-row"><span>Subtotal</span><strong>₹<AnimatedNumber value={subtotal.toLocaleString("en-IN")} /></strong></div>
+                  <AnimatePresence initial={false}>
+                    {couponApplied && (
+                      <motion.div
+                        key="promo"
+                        className="summary-row discount-row"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: EASE }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <span>Promo savings</span><strong>−₹<AnimatedNumber value={couponDiscount.toLocaleString("en-IN")} /></strong>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <div className="summary-row"><span>Delivery</span><strong>{deliveryCharge === 0 ? "Complimentary" : `₹${deliveryCharge}`}</strong></div>
                 </div>
-                <div className="summary-total"><span>Total <small>Inclusive of taxes</small></span><strong>₹{totalAmount.toLocaleString("en-IN")}</strong></div>
+                <div className="summary-total"><span>Total <small>Inclusive of taxes</small></span><strong>₹<AnimatedNumber value={totalAmount.toLocaleString("en-IN")} /></strong></div>
                 <textarea className="checkout-address" placeholder="Delivery address" value={address} onChange={(event) => setAddress(event.target.value)} rows={3} />
                 <fieldset className="payment-options">
                   <legend>Payment method</legend>
@@ -260,12 +296,12 @@ function Cart() {
                     <span><strong>Cash on delivery</strong><small>Pay when your order arrives</small></span>
                   </label>
                 </fieldset>
-                <button type="button" className="checkout-btn" onClick={placeOrder} disabled={paying}>
-                  {!user ? "Log in to checkout" : paying ? "Please wait..." : paymentMethod === "razorpay" ? `Pay ₹${totalAmount.toLocaleString("en-IN")}` : "Place order"} <span aria-hidden="true">→</span>
+                <button type="button" className="checkout-btn" onClick={placeOrder} disabled={paying} aria-busy={paying}>
+                  <span>{paying && <span className="btn-spinner" aria-hidden="true" />}{!user ? "Log in to checkout" : paying ? "Please wait..." : paymentMethod === "razorpay" ? `Pay ₹${totalAmount.toLocaleString("en-IN")}` : "Place order"}</span> <span aria-hidden="true">→</span>
                 </button>
-                <p className="checkout-message" role="status">{checkoutMessage}</p>
+                <Notice show={Boolean(checkoutMessage)} className="checkout-message" role="status">{checkoutMessage}</Notice>
                 <p className="secure-payment"><span aria-hidden="true">◇</span> Secure checkout · Easy 14-day returns</p>
-              </aside>
+              </Reveal>
             </div>
           </>
         )}

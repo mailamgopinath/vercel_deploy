@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useCart } from "../CartContext";
+import { AnimatePresence, motion, EASE } from "../motion";
 
 // Small icons drawn as SVG so they look sharp and clear at any size.
 const iconProps = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -21,6 +22,15 @@ function Header() {
     const { cartItems } = useCart();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
+    const [menuOpen, setMenuOpen] = useState(false);     // phone menu
+    const [scrolled, setScrolled] = useState(false);     // adds a shadow to the sticky header
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 8);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
 
     // How many items are in the bag (shown on the bag icon).
     const bagCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -36,7 +46,7 @@ function Header() {
     return (
         <>
             <div className="announcement">Complimentary shipping on orders over ₹1,999</div>
-            <header className="site-header">
+            <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
                 <div className="header-main">
                     <Link to="/" className="brand" aria-label="Stylehub home">
                         <span className="brand-mark" aria-hidden="true">S</span>
@@ -63,8 +73,30 @@ function Header() {
                         </form>
                         <Link className="icon-link" to="/wishlist" aria-label="Saved items"><HeartIcon /></Link>
                         <Link className="icon-link" to="/cart" aria-label={`Shopping bag, ${bagCount} items`}>
-                            <BagIcon />
-                            {bagCount > 0 && <span className="bag-count">{bagCount}</span>}
+                            {/* the bag "bumps" each time the number of items changes */}
+                            <motion.span
+                                key={bagCount}
+                                style={{ display: "grid", placeItems: "center" }}
+                                initial={bagCount > 0 ? { scale: 1.3, rotate: -10 } : false}
+                                animate={{ scale: 1, rotate: 0 }}
+                                transition={{ type: "spring", stiffness: 420, damping: 14 }}
+                            >
+                                <BagIcon />
+                            </motion.span>
+                            <AnimatePresence>
+                                {bagCount > 0 && (
+                                    <motion.span
+                                        key="count"
+                                        className="bag-count"
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        exit={{ scale: 0 }}
+                                        transition={{ type: "spring", stiffness: 500, damping: 18 }}
+                                    >
+                                        {bagCount}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
                         </Link>
                         {user && <Link className="header-text-link" to="/orders">My orders</Link>}
                         {user ? (
@@ -72,8 +104,39 @@ function Header() {
                         ) : (
                             <Link className="auth-link" to="/login">Log in</Link>
                         )}
+                        <button
+                            type="button"
+                            className="menu-toggle"
+                            aria-label={menuOpen ? "Close menu" : "Open menu"}
+                            aria-expanded={menuOpen}
+                            aria-controls="mobile-menu"
+                            onClick={() => setMenuOpen((open) => !open)}
+                        >
+                            <span />
+                        </button>
                     </div>
                 </div>
+
+                {/* Phone menu: slides open and closed */}
+                <AnimatePresence initial={false}>
+                    {menuOpen && (
+                        <motion.div
+                            id="mobile-menu"
+                            className="mobile-menu"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.35, ease: EASE }}
+                        >
+                            <nav aria-label="Mobile navigation" onClick={() => setMenuOpen(false)}>
+                                <Link to="/women">Women</Link>
+                                <Link to="/men">Men</Link>
+                                <Link to="/kids">Kids</Link>
+                                {user && <Link to="/orders">My orders</Link>}
+                            </nav>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </header>
         </>
     );

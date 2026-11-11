@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
 import { fetchProducts } from "../api";
+import { Reveal, stagger } from "../motion";
+import { ProductCardsSkeleton } from "../components/Skeletons";
 
 function Shop() {
 
@@ -15,11 +17,13 @@ function Shop() {
 
   const [products, setProducts] = useState([]);
   const [loadError, setLoadError] = useState("");
+  const [loading, setLoading] = useState(true); // true until the server has answered
 
   useEffect(() => {
     fetchProducts()
       .then(setProducts)
-      .catch(() => setLoadError("Could not load products. Is the server running?"));
+      .catch(() => setLoadError("Could not load products. Is the server running?"))
+      .finally(() => setLoading(false));
   }, []);
 
   // =========================
@@ -500,15 +504,22 @@ function Shop() {
               PRODUCT GRID
           ========================= */}
 
-          {filteredProducts.length > 0 ? (
+          {loading ? (
+
+            <div className="shop-product-grid" aria-busy="true">
+              <ProductCardsSkeleton variant="shop" count={8} />
+            </div>
+
+          ) : filteredProducts.length > 0 ? (
 
             <div className="shop-product-grid">
 
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product, index) => (
 
-                <div
+                <Reveal
                   className="shop-product-card"
                   key={product.id}
+                  delay={stagger(index)}
                 >
 
                   {/* PRODUCT IMAGE */}
@@ -593,7 +604,7 @@ function Shop() {
                     </button>
 
                   </div>
-                </div>
+                </Reveal>
               ))}
 
             </div>

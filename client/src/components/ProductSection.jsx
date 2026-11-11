@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
 import { fetchProducts } from "../api";
+import { Reveal, stagger } from "../motion";
 
 function ProductSection({ id, title, subtitle }) {
     const { cartItems, addToCart } = useCart();
@@ -10,27 +11,40 @@ function ProductSection({ id, title, subtitle }) {
 
     // Show the first 4 products from the backend.
     const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true); // true until the server has answered
 
     useEffect(() => {
-        fetchProducts().then((all) => setProducts(all.slice(0, 4))).catch(() => {});
+        fetchProducts()
+            .then((all) => setProducts(all.slice(0, 4)))
+            .catch(() => {})
+            .finally(() => setLoading(false));
     }, []);
 
     return (
         <section className="products-section" id={id}>
 
-            <div className="section-heading">
+            <Reveal className="section-heading" y={18}>
 
                 <h2>{title}</h2>
 
                 <p>{subtitle}</p>
 
-            </div>
+            </Reveal>
 
             <div className="product-grid">
 
-                {products.map((product) => (
+                {/* grey shimmering placeholders while the products load */}
+                {loading && [0, 1, 2, 3].map((n) => (
+                    <div className="skeleton-card" key={n} aria-hidden="true">
+                        <div className="skeleton skeleton-image" />
+                        <div className="skeleton skeleton-line" />
+                        <div className="skeleton skeleton-line short" />
+                    </div>
+                ))}
 
-                    <article className="product-card" key={product.id} data-product-name={product.name}>
+                {products.map((product, index) => (
+
+                    <Reveal as="article" className="product-card" key={product.id} data-product-name={product.name} delay={stagger(index)}>
 
                         <div className="product-image">
                             <Link to={`/product/${product.id}`} aria-label={`View ${product.name}`}>
@@ -77,7 +91,7 @@ function ProductSection({ id, title, subtitle }) {
 
                         </div>
 
-                    </article>
+                    </Reveal>
 
                 ))}
 

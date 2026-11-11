@@ -9,7 +9,9 @@ import Offers from "../components/Offers";
 import Reviews from "../components/Reviews";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
+import { Reveal } from "../motion";
 
+// Each section fades in and slides up the first time it scrolls into view.
 function Home() {
     return (
         <>
@@ -19,13 +21,13 @@ function Home() {
 
             <Banners />
 
-            <section className="trust-strip" aria-label="Shopping benefits">
+            <Reveal as="section" className="trust-strip" aria-label="Shopping benefits" y={16}>
                 <div className="trust-item"><span className="trust-icon" aria-hidden="true">↗</span>Free shipping over ₹1,999</div>
                 <div className="trust-item"><span className="trust-icon" aria-hidden="true">↺</span>Easy 14-day returns</div>
                 <div className="trust-item"><span className="trust-icon" aria-hidden="true">♡</span>Thoughtfully selected</div>
-            </section>
+            </Reveal>
 
-            <Categories />
+            <Reveal><Categories /></Reveal>
 
             <ProductSection
                 id="new-arrivals"
@@ -45,11 +47,11 @@ function Home() {
                 subtitle="Our most popular products"
             />
 
-            <Offers />
+            <Reveal scale={0.98}><Offers /></Reveal>
 
-            <Reviews />
+            <Reveal><Reviews /></Reveal>
 
-            <Newsletter />
+            <Reveal y={16}><Newsletter /></Reveal>
 
             <Footer />
         </>

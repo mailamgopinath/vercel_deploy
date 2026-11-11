@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
+import { Reveal, stagger } from "../motion";
 
 function Banners() {
   const [banners, setBanners] = useState([]);
@@ -15,20 +16,25 @@ function Banners() {
 
   return (
     <section className="home-banners" aria-label="Offers">
-      {banners.map((banner) => {
+      {banners.map((banner, index) => {
         const content = (
           <>
             {banner.image && <img src={banner.image} alt="" />}
             <div className="home-banner-text">
               <h2>{banner.title}</h2>
               {banner.subtitle && <p>{banner.subtitle}</p>}
+              {banner.link && <span className="home-banner-cta">Explore <span aria-hidden="true">→</span></span>}
             </div>
           </>
         );
-        // A banner with a link is clickable.
-        return banner.link
-          ? <Link className="home-banner" to={banner.link} key={banner.id}>{content}</Link>
-          : <div className="home-banner" key={banner.id}>{content}</div>;
+        // A banner with a link is clickable. Each one fades in as it scrolls into view.
+        return (
+          <Reveal className="home-banner-slot" key={banner.id} delay={stagger(index, 0.1)} y={20}>
+            {banner.link
+              ? <Link className="home-banner" to={banner.link}>{content}</Link>
+              : <div className="home-banner">{content}</div>}
+          </Reveal>
+        );
       })}
     </section>
   );

@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useAuth } from "../AuthContext";
 import api, { errorMessage } from "../api";
+import { OrdersSkeleton } from "../components/Skeletons";
 
 const rupees = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
 
@@ -14,13 +15,18 @@ function MyOrders() {
   const [returningId, setReturningId] = useState(null); // order whose return form is open
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true); // true until the first answer arrives
 
   function load() {
-    api.get("/orders").then((response) => setOrders(response.data));
+    api.get("/orders")
+      .then((response) => setOrders(response.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
     if (user) load();
+    else setLoading(false);
   }, [user]);
 
   async function requestReturn(orderId) {
@@ -53,6 +59,8 @@ function MyOrders() {
             <h2>Log in to see your orders</h2>
             <Link to="/login" className="shopping-primary-link">Log in</Link>
           </section>
+        ) : loading ? (
+          <OrdersSkeleton />
         ) : orders.length === 0 ? (
           <section className="shopping-empty">
             <h2>No orders yet</h2>
